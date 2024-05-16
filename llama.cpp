@@ -4467,6 +4467,9 @@ static void llm_load_vocab(
             } else if (
                 tokenizer_pre == "dbrx") {
                 vocab.type_pre = LLAMA_VOCAB_PRE_TYPE_DBRX;
+            } else if (
+                tokenizer_pre == "viking-7b") {
+                vocab.type_pre = LLAMA_VOCAB_PRE_TYPE_DEFAULT; // Hack!!!
             } else {
                 throw std::runtime_error(format("unknown pre-tokenizer type: '%s'", tokenizer_pre.c_str()));
             }
