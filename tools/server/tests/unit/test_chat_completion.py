@@ -623,3 +623,27 @@ def test_verbose_debug():
             assert "Book" in res.body["__verbose"]["prompt"]
         else:
             assert "__verbose" not in res.body
+
+
+def test_verbose_debug_stream():
+    global server
+    server.start()
+    for verbose in [True, False]:
+        res = server.make_stream_request("POST", "/chat/completions", data={
+            "max_tokens": 2,
+            "messages": [
+                {"role": "system", "content": "Book"},
+                {"role": "user", "content": "What is the best book"},
+            ],
+            "verbose": verbose,
+            "stream": True,
+        })
+        verbose_chunks = [data for data in res if "__verbose" in data]
+        if verbose:
+            # __verbose is only attached to one of the chunks sent once generation finishes,
+            # not to every partial chunk of the stream
+            assert len(verbose_chunks) == 1
+            assert "Book" in verbose_chunks[0]["__verbose"]["prompt"]
+            assert verbose_chunks[0]["__verbose"]["generation_settings"]["n_predict"] == 2
+        else:
+            assert len(verbose_chunks) == 0

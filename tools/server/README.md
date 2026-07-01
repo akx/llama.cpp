@@ -1363,6 +1363,28 @@ The server supports parsing and returning reasoning via the `reasoning_content` 
 
 Reasoning input (preserve reasoning in history) is also supported by some specific templates. For more details, please refer to [PR#18994](https://github.com/ggml-org/llama.cpp/pull/18994).
 
+*Verbose debug output*
+
+Setting `"verbose": true` in the request adds a `__verbose` object to the response, containing the same fields as the `/completion` endpoint's response (see above), including the effective, fully-merged `generation_settings` (i.e. request options layered on top of server defaults) and the processed `prompt`. The server can also be started with `-v`/`--verbose` (or `--verbosity` above 9) to make `verbose` default to `true` for every request.
+
+In streaming mode, `__verbose` is attached to one of the last `chat.completion.chunk` events sent once generation finishes, not to any of the earlier partial chunks.
+
+```js
+{
+  // ...
+  "__verbose": {
+    // ...
+    "generation_settings": {
+      "temperature": 0.8,
+      "top_p": 0.95
+      // ...
+    }
+  }
+}
+```
+
+`__verbose` is an internal debugging aid, not a stable part of the API — its shape (and that of the nested `generation_settings`) may change or be removed without notice between versions.
+
 ### POST `/v1/chat/completions/control`: Control a running chat completion in real time
 
 Acts on an in-flight completion identified by its `id` (the `id` field streamed back by `/v1/chat/completions`). The request is processed in parallel with the SSE stream, so the client sends it while still reading tokens.
